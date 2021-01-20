@@ -9,24 +9,18 @@ from rest_framework import permissions
 
 
 
-class ChatList(generics.ListCreateAPIView):
+class ChatList(generics.CreateAPIView):
     serializer_class = ChatSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        queryset = Chat.objects.filter(user1=self.request.user,
-        user2=get_user_model().objects.get(username = self.request.data['reciever'])) | Chat.objects.filter(user2=self.request.user,
-        user1=get_user_model().objects.get(username = self.request.data['reciever']))
-        return queryset
-
     def perform_create(self, serializer):
         qyeryset = Chat.objects.filter(user1=self.request.user,
-        user2=get_user_model().objects.get(username = self.request.data['reciever'])) | Chat.objects.filter(user2=self.request.user,
-        user1=get_user_model().objects.get(username = self.request.data['reciever']))
+        user2=get_user_model().objects.get(username = self.request.data['receiver'])) | Chat.objects.filter(user2=self.request.user,
+        user1=get_user_model().objects.get(username = self.request.data['receiver']))
 
         if len(qyeryset) == 0:
             serializer.save(user1=self.request.user,
-                user2=get_user_model().objects.get(username = self.request.data['reciever']))
+                user2=get_user_model().objects.get(username = self.request.data['receiver']))
 
 class MessageList(generics.ListCreateAPIView):
     serializer_class = MessageSerializer
@@ -34,8 +28,8 @@ class MessageList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Chat.objects.filter(user1=self.request.user,
-        user2=get_user_model().objects.get(username = self.request.data['reciever'])) | Chat.objects.filter(user2=self.request.user,
-        user1=get_user_model().objects.get(username = self.request.data['reciever']))
+        user2=get_user_model().objects.get(username = self.request.data['receiver'])) | Chat.objects.filter(user2=self.request.user,
+        user1=get_user_model().objects.get(username = self.request.data['receiver']))
 
         queryset = Message.objects.filter(chat_id=queryset[0])#.values('message_text', 'author')
         return queryset
@@ -45,17 +39,16 @@ class MessageList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         queryset = Chat.objects.filter(user1=self.request.user,
-        user2=get_user_model().objects.get(username = self.request.data['reciever'])) | Chat.objects.filter(user2=self.request.user,
-        user1=get_user_model().objects.get(username = self.request.data['reciever']))
+        user2=get_user_model().objects.get(username = self.request.data['receiver'])) | Chat.objects.filter(user2=self.request.user,
+        user1=get_user_model().objects.get(username = self.request.data['receiver']))
 
         if len(queryset) == 0:
             ChatSerializer.save(user1=self.request.user,
-                user2=get_user_model().objects.get(username = self.request.data['reciever']))
+                user2=get_user_model().objects.get(username = self.request.data['receiver']))
 
         queryset = Chat.objects.filter(user1=self.request.user,
-        user2=get_user_model().objects.get(username = self.request.data['reciever']))| Chat.objects.filter(user2=self.request.user,
-        user1=get_user_model().objects.get(username = self.request.data['reciever']))
-        #queryset = Message.objects.filter(chat_id=queryset[0])
+        user2=get_user_model().objects.get(username = self.request.data['receiver']))| Chat.objects.filter(user2=self.request.user,
+        user1=get_user_model().objects.get(username = self.request.data['receiver']))
         serializer.save(message_text = self.request.data.get('message_text'),
         author = self.request.user, chat_id = queryset[0])
 
